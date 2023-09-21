@@ -34,17 +34,17 @@ Para iniciar a API no docker, siga estas etapas:
 
 Em um ambiente linux, construa a imagem:
 ```
-sudo docker build -t webserver:v01 .
+sudo docker build -t webserver:v02 .
 ```
 
 Logo apos, teste a imagem com o seguinte comando:
 ```
-sudo docker run webserver:v01
+sudo docker run webserver:v02
 ```
 
 Preparando para o kubernete (Importante, verificar o nome da tag inserida no arquivo deployment.yaml)*:
 ```
-sudo docker tag webserver:v01 localhost:32000/webserver:v01
+sudo docker tag webserver:v02 localhost:32000/webserver:v02
 ```
 
 Lembre-se de executar o microk8s (microk8s start)
@@ -56,7 +56,7 @@ sudo microk8s kubectl apply -n staging -f scr_k8s/deployment.yaml
 
 Depois disso, executar o push!
 ```
-sudo docker push localhost:32000/webserver:v01
+sudo docker push localhost:32000/webserver:v02
 ```
 
 
