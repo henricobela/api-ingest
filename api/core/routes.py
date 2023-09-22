@@ -23,7 +23,7 @@ def hello():
 def config():
     conn = sqlite3.connect('api/core/db/data.db')
     cursor = conn.cursor()
-
+    
     get_df = TksRequest()
     df = get_df.get_data_response()
     colunas = ', '.join(df.columns)
