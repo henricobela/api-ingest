@@ -17,8 +17,8 @@ O projeto ainda está em desenvolvimento e as próximas atualizações serão vo
 - [x] Criacao da API
 - [x] Dockerizacao
 - [x] Kubernetes
-- [ ] Refactoring do Codigo da API
-- [ ] Organizacao de todo o codigo, afim de se enquadrar nas boas praticas de construcao de APIS Flask
+- [x] Refactoring do Codigo da API
+- [x] Organizacao de todo o codigo, afim de se enquadrar nas boas praticas de construcao de APIS Flask
 
 ## 💻 Pré-requisitos
 
