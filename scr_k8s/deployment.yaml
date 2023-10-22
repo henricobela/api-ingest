@@ -36,6 +36,6 @@ spec:
     spec:
       containers:
       - name: webserver
-        image: localhost:32000/webserver:v02
+        image: localhost:32000/webserver:v03
         ports:
         - containerPort: 5000
