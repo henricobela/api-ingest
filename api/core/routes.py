@@ -7,6 +7,7 @@ import numpy as np
 from datetime import datetime
 import pandas as pd
 import threading
+import time
 
 
 bp = Blueprint('core',__name__)
@@ -67,32 +68,40 @@ def config():
 
 
 
-# # Endpoint de ingestao de dados para o banco
-# @bp.route('/ingest', methods=['POST'])
-# def ingest():
-#     get_df = TksRequest()
-#     df = get_df.get_data_response()
-#     colunas = ', '.join(df.columns)
-#     tabela = "configurations"
-#     values = df.values.tolist()
-#     placeholders = ', '.join(['?'] * len(df.columns))
+# Endpoint de ingestao de dados para o banco
+@bp.route('/slow_ingest', methods=['POST'])
+def ingest():
+    start_time = time.time()
 
-#     conn = sqlite3.connect('api/core/db/data.db')
-#     cursor = conn.cursor()
-#     sql = f'INSERT INTO {tabela} ({colunas}) VALUES ({placeholders})'
-#     values = [tuple(x) for x in df.values.tolist()]
-#     cursor.execute(f"DELETE FROM {tabela}")
-#     cursor.executemany(sql, values)
-#     conn.commit()
-#     cursor.close()
-#     conn.close()
+    get_df = TksRequest()
+    df = get_df.get_data_response()
+    colunas = ', '.join(df.columns)
+    tabela = "configurations"
+    values = df.values.tolist()
+    placeholders = ', '.join(['?'] * len(df.columns))
+
+    conn = sqlite3.connect('api/core/db/data.db')
+    cursor = conn.cursor()
+    sql = f'INSERT INTO {tabela} ({colunas}) VALUES ({placeholders})'
+    values = [tuple(x) for x in df.values.tolist()]
+    cursor.execute(f"DELETE FROM {tabela}")
+    cursor.executemany(sql, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    end_time = time.time()
+    processing_time = end_time - start_time
     
-#     return jsonify({'message': 'Insercao de dados realizada com sucesso'})
+    return jsonify({'message': 'Insercao de dados realizada com sucesso, não utilizando tecnicas de otimização',
+                    'processing_time_seconds': processing_time})
 
 
 # Aplicando conceito de multithreading
-@bp.route('/ingest', methods=['POST'])
+@bp.route('/fast_ingest', methods=['POST'])
 def ingest():
+    start_time = time.time()
+
     num_threads = 4
     threads = []
 
@@ -103,8 +112,12 @@ def ingest():
 
     for thread in threads:
         thread.join()
+    
+    end_time = time.time()
+    processing_time = end_time - start_time
 
-    return jsonify({'message': 'Insercao de dados realizada com sucesso'})
+    return jsonify({'message': 'Insercao de dados realizada com sucesso, utilizando Multithreading',
+                    'processing_time_seconds': processing_time})
 
 
 
