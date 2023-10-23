@@ -70,7 +70,7 @@ def config():
 
 # Endpoint de ingestao de dados para o banco
 @bp.route('/slow_ingest', methods=['POST'])
-def ingest():
+def slow_ingest():
     start_time = time.time()
 
     get_df = TksRequest()
@@ -99,7 +99,7 @@ def ingest():
 
 # Aplicando conceito de multithreading
 @bp.route('/fast_ingest', methods=['POST'])
-def ingest():
+def fast_ingest():
     start_time = time.time()
 
     num_threads = 4
