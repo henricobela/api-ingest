@@ -6,10 +6,38 @@ import json, sqlite3, requests
 import numpy as np
 from datetime import datetime
 import pandas as pd
+import threading
 
 
 bp = Blueprint('core',__name__)
 bp_v1 = Blueprint('status',__name__)
+
+
+# Função para inserir dados no banco
+def inserir_dados():
+    conn = sqlite3.connect('api/core/db/data.db')
+    cursor = conn.cursor()
+    
+    get_df = TksRequest()
+    df = get_df.get_data_response()
+    colunas = ', '.join(df.columns)
+    tabela = "configurations"
+    placeholders = ', '.join(['?'] * len(df.columns))
+
+    sql = f'CREATE TABLE IF NOT EXISTS {tabela} (id INTEGER PRIMARY KEY AUTOINCREMENT, {colunas})'
+    cursor.execute(sql)
+    conn.commit()
+    
+    sql = f'INSERT INTO {tabela} ({colunas}) VALUES ({placeholders})'
+    values = [tuple(x) for x in df.values.tolist()]
+    cursor.execute(f"DELETE FROM {tabela}")
+    cursor.executemany(sql, values)
+    conn.commit()
+    
+    cursor.close()
+    conn.close()
+
+
 
 
 # Endpoint inicial mostrando membros da equipe
@@ -38,27 +66,46 @@ def config():
     return jsonify({'message': 'Configuração realizada com sucesso'})
 
 
-# Endpoint de ingestao de dados para o banco
+
+# # Endpoint de ingestao de dados para o banco
+# @bp.route('/ingest', methods=['POST'])
+# def ingest():
+#     get_df = TksRequest()
+#     df = get_df.get_data_response()
+#     colunas = ', '.join(df.columns)
+#     tabela = "configurations"
+#     values = df.values.tolist()
+#     placeholders = ', '.join(['?'] * len(df.columns))
+
+#     conn = sqlite3.connect('api/core/db/data.db')
+#     cursor = conn.cursor()
+#     sql = f'INSERT INTO {tabela} ({colunas}) VALUES ({placeholders})'
+#     values = [tuple(x) for x in df.values.tolist()]
+#     cursor.execute(f"DELETE FROM {tabela}")
+#     cursor.executemany(sql, values)
+#     conn.commit()
+#     cursor.close()
+#     conn.close()
+    
+#     return jsonify({'message': 'Insercao de dados realizada com sucesso'})
+
+
+# Aplicando conceito de multithreading
 @bp.route('/ingest', methods=['POST'])
 def ingest():
-    get_df = TksRequest()
-    df = get_df.get_data_response()
-    colunas = ', '.join(df.columns)
-    tabela = "configurations"
-    values = df.values.tolist()
-    placeholders = ', '.join(['?'] * len(df.columns))
+    num_threads = 4
+    threads = []
 
-    conn = sqlite3.connect('api/core/db/data.db')
-    cursor = conn.cursor()
-    sql = f'INSERT INTO {tabela} ({colunas}) VALUES ({placeholders})'
-    values = [tuple(x) for x in df.values.tolist()]
-    cursor.execute(f"DELETE FROM {tabela}")
-    cursor.executemany(sql, values)
-    conn.commit()
-    cursor.close()
-    conn.close()
-    
+    for _ in range(num_threads):
+        thread = threading.Thread(target=inserir_dados)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
     return jsonify({'message': 'Insercao de dados realizada com sucesso'})
+
 
 
 # Endpoint para gerar payload
